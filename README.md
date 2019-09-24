@@ -1,0 +1,1 @@
+screenshoter-extension
