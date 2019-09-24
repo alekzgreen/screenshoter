@@ -1,0 +1,12 @@
+node_modules/
+app/bg/
+app/content/
+\.DS_Store
+
+app/download\.html
+
+app/download/bundle\.js
+
+app/manifest\.json
+
+app/
