@@ -46,7 +46,7 @@ export default {
   top: 0;
   left: 0;
   z-index: 1;
-  background-color: #363635;
+  background-color: #121212;
   padding: 0 30px;
   justify-content: flex-end;
   box-sizing: border-box;
@@ -78,41 +78,19 @@ export default {
       width: 0;
       height: 2px;
       transition: width 0.3s;
-      background-color: #f9d383;
+      background-color: #c1494f;
       position: absolute;
       bottom: 0;
     }
 
     &:hover {
-      color: #f9d383;
+      color: #c1494f;
     }
 
     &_active {
-      color: #f9d383;
+      color: #c1494f;
       &:after {
         width: 30px;
-      }
-    }
-
-    &_instant, &_infinite {
-      background-image: url(../../assets/instant.png);
-      background-repeat: no-repeat;
-      background-size: 20px;
-      background-position: 0 center;
-      padding: 0 20px 0 25px;
-      color: #fdc600;
-
-      &:hover {
-        color: #fdc600;
-      }
-    }
-
-    &_infinite {
-      background-image: url(../../assets/infinite.png);
-      color: #81d9e7;
-
-      &:hover {
-        color: #f671a7;
       }
     }
   }

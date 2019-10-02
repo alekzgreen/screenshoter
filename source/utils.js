@@ -49,7 +49,7 @@ const getStorageData = (keys) => {
   return promise;
 };
 
-const setStorageData = items => new Promise(resolve => chrome.storage.local.set(items, () => resolve(true)));
+const setStorageData = i => new Promise(r => chrome.storage.local.set(i, () => r(true)));
 /* eslint-disable */
 const uuidv4 = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

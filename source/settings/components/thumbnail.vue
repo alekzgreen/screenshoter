@@ -2,29 +2,27 @@
   <div class="thumbnail" @click="download">
     <div class="thumbnail__image" :style="{backgroundImage: `url(${image.imageUrl})`}"></div>
     <div
-      class="thumbnail__image thumbnail__image_download"
-      v-html="require('!!svg-inline-loader!../../assets/download.svg')"
-    ></div>
-    <div
       class="thumbnail__icon thumbnail__icon_delete"
-      v-html="require('!!svg-inline-loader!../../assets/delete.svg')"
+      v-html="require('!!svg-inline-loader!../../assets/close.svg')"
       @click.stop="remove"
     ></div>
     <div class="thumbnail__info">
-      <div class="thumbnail__title">{{ image.title }}</div>
-      <div class="thumbnail__date">{{ image.created }}</div>
-    </div>
-    <!-- <div class="thumbnail__ctas" @click.stop>
+      <div class="thumbnail__ctas">
           <div
           class="thumbnail__icon"
-          title="Click to copy!"
-          @click.stop="copyLink(video.shortUrl || video.fullUrl)"
-          v-html="require('!!svg-inline-loader!../../assets/link.svg')"></div>
-        </div>
-        <div class="thumbnail__info">
-          <div class="thumbnail__title">{{ video.title }}</div>
-          <div class="thumbnail__date">{{ video.timeCreated | date }}</div>
-    </div>-->
+          v-html="require('!!svg-inline-loader!../../assets/download.svg')"
+          :style="{ marginRight: '10px' }"
+        ></div>
+        <div class="thumbnail__delimeter"></div>
+        <div
+          class="thumbnail__icon"
+          v-html="require('!!svg-inline-loader!../../assets/link.svg')"
+          :style="{ marginLeft: '10px' }"
+        ></div>
+      </div>
+      <div class="thumbnail__title">{{ image.title }}</div>
+      <div class="thumbnail__date">{{ image.created | date }}</div>
+    </div>
   </div>
 </template>
 
@@ -73,37 +71,15 @@ export default {
 </script>
 
 <style lang="less">
-.content {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 150px);
-  grid-template-rows: auto;
-  grid-column-gap: 25px;
-  grid-row-gap: 25px;
-  margin-top: 60px;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 50px;
-  overflow: hidden;
-  overflow-y: auto;
-  justify-content: center;
-
-  &__title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-    grid-area: header;
-  }
-}
-
 .thumbnail {
   display: flex;
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
   justify-self: center;
   box-sizing: border-box;
-  box-shadow: 0 0px 30px 0 #363635;
+  box-shadow: 0 0px 30px 0 #121212;
   border-radius: 3px;
-  border: 3px solid #fff;
+  // border: 2px solid #fff;
   flex-shrink: 0;
   cursor: pointer;
   position: relative;
@@ -120,17 +96,8 @@ export default {
   }
 
   &:hover {
-    border: 3px solid #f9d383;
-
     .thumbnail__info {
-      bottom: 0;
-    }
-
-    .thumbnail__image {
-      filter: grayscale(0);
-      &_download {
-        opacity: 1;
-      }
+      opacity: 1;
     }
   }
 
@@ -142,48 +109,42 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    transition: filter 0.3s;
-    filter: grayscale(0.7);
-
-    &:hover {
-      filter: grayscale(0);
-    }
-
-    &_download {
-      opacity: 0;
-      transition: opacity 0.3s;
-      align-items: center;
-      justify-content: center;
-      svg {
-        width: 35%;
-        height: 35%;
-        g {
-          fill: #f9d383;
-        }
-      }
-    }
+    filter: grayscale(0.4);
   }
 
   &__info {
     display: flex;
     width: 100%;
+    height: 100%;
     background-color: #37373780;
     position: absolute;
     flex-shrink: 0;
-    bottom: -50px;
+    top: 0;
+    opacity: 0;
     flex-direction: column;
     padding: 5px;
     box-sizing: border-box;
-    justify-content: space-between;
     transition: bottom 0.3s;
+    line-height: 1.7;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .5s;
   }
 
   &__title {
     font-size: 12px;
     font-weight: 600;
+    width: 100%;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    text-align: center;
+  }
+
+  &__delimeter {
+    display: flex;
+    height: 40px;
+    border-right: 2px solid #ffffff80;
   }
 
   &__date {
@@ -193,49 +154,44 @@ export default {
 
   &__ctas {
     display: flex;
-    position: absolute;
-    right: 10px;
-    top: 10px;
+    margin-bottom: 10px;
   }
 
   &__icon {
     display: flex;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 20px 20px;
     justify-content: center;
     align-items: center;
-    background-color: #1f1f1f;
     border-radius: 50%;
 
+    &:hover {
+      svg {
+        opacity: 1;
+      }
+    }
+
     svg {
-      width: 60%;
-      height: 60%;
+      width: 100%;
+      height: 100%;
+      opacity: 0.7;
+      transition: opacity .3s;
+      g {
+        fill: #c1494f;
+      }
     }
 
     &_delete {
-      width: 20px;
-      height: 20px;
+      width: 12px;
+      height: 12px;
       position: absolute;
-      top: 5px;
-      right: 5px;
+      top: 6px;
+      right: 6px;
       background-color: transparent;
-      opacity: 0.5;
-      transition: opacity 0.3s;
-
-      &:hover {
-        opacity: 1;
-      }
-
-      svg {
-        width: 100%;
-        height: 100%;
-        g {
-          fill: #ee7766;
-        }
-      }
+      z-index: 1;
     }
   }
 }
