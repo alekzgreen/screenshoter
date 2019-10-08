@@ -11,10 +11,7 @@ import {
   captureVisibleTab,
   sendBackgroundMessage,
 } from '../utils';
-
-/* import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/functions'; */
+import FireSaver from './fireSaver';
 
 /* eslint class-methods-use-this: ["error", {
   "exceptMethods": [
@@ -28,6 +25,16 @@ import 'firebase/functions'; */
     "deleteImage"
   ]
 }] */
+
+const fireSaver = new FireSaver({
+  apiKey: 'AIzaSyB7IG2gAqcU5XTepnCHYaQk5bhX_Mqo34Y',
+  authDomain: 't1nylink.firebaseapp.com',
+  databaseURL: 'https://t1nylink.firebaseio.com',
+  projectId: 't1nylink',
+  storageBucket: 't1nylink.appspot.com',
+  messagingSenderId: '308873833962',
+  appId: '1:308873833962:web:c5869b0575dc9455b15693',
+});
 
 export default class Screenshoter {
   constructor() {
@@ -85,13 +92,16 @@ export default class Screenshoter {
     let { images } = await getStorageData('images');
     images = images || {};
     const id = this.generateUniqueId(Object.keys(images));
-    images[id] = {
+    const fullLink = await fireSaver.upload(imageUrl);
+    const shortLinkData = fullLink ? await fireSaver.createShortLink(fullLink) : null;
+    images[id] = Object.assign({
       url,
       title,
       imageUrl,
+      fullLink,
       type,
       created: Date.now(),
-    };
+    }, shortLinkData);
     setStorageData({ images });
   }
 
