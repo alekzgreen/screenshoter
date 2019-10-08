@@ -1,5 +1,6 @@
 <template>
-  <div class="thumbnail" @click="download">
+  <div
+    :class="['thumbnail', removing && 'thumbnail_deleted']">
     <div class="thumbnail__image" :style="{backgroundImage: `url(${image.imageUrl})`}"></div>
     <div
       class="thumbnail__icon thumbnail__icon_delete"
@@ -12,12 +13,14 @@
           class="thumbnail__icon"
           v-html="require('!!svg-inline-loader!../../assets/download.svg')"
           :style="{ marginRight: '10px' }"
+          @click="download"
         ></div>
         <div class="thumbnail__delimeter"></div>
         <div
           class="thumbnail__icon"
           v-html="require('!!svg-inline-loader!../../assets/link.svg')"
           :style="{ marginLeft: '10px' }"
+          @click="copyLink"
         ></div>
       </div>
       <div class="thumbnail__title">{{ image.title }}</div>
@@ -27,7 +30,7 @@
 </template>
 
 <script>
-import { copyToClipboard, downloadFile } from '../../utils';
+import { copyToClipboard, downloadFile, asyncTimeout } from '../../utils';
 
 export default {
   props: ['id', 'image'],
@@ -43,8 +46,9 @@ export default {
     },
   },
   methods: {
-    copyLink(link) {
-      copyToClipboard(link);
+    copyLink() {
+      const { fullLink, shortLink } = this.image;
+      copyToClipboard(shortLink || fullLink);
     },
     openVideo(link) {
       window.open(link, 'blank_');
@@ -63,6 +67,8 @@ export default {
         this.removing = true;
         const { screenshoter } = chrome.extension.getBackgroundPage();
         await screenshoter.deleteImage(this.id);
+        await asyncTimeout(50);
+        await this.$store.dispatch('init');
       }
       this.removing = false;
     },
@@ -76,10 +82,10 @@ export default {
   width: 160px;
   height: 160px;
   justify-self: center;
+  align-self: center;
   box-sizing: border-box;
   box-shadow: 0 0px 30px 0 #121212;
   border-radius: 3px;
-  // border: 2px solid #fff;
   flex-shrink: 0;
   cursor: pointer;
   position: relative;
@@ -91,8 +97,8 @@ export default {
 
   &_deleted {
     filter: blur(5px);
-    width: 20px;
-    height: 20px;
+    width: 0;
+    height: 0;
   }
 
   &:hover {
@@ -109,7 +115,6 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    filter: grayscale(0.4);
   }
 
   &__info {

@@ -38,7 +38,7 @@ const fireSaver = new FireSaver({
 
 export default class Screenshoter {
   constructor() {
-    // this.init();
+    this.saving = false;
     this.setEvents();
   }
 
@@ -89,10 +89,12 @@ export default class Screenshoter {
   }
 
   async saveImage({ url, title }, imageUrl, type) {
-    let { images } = await getStorageData('images');
-    images = images || {};
+    if (this.saving) {
+      return false;
+    }
+    const { images = {} } = await getStorageData('images');
     const id = this.generateUniqueId(Object.keys(images));
-    const fullLink = await fireSaver.upload(imageUrl);
+    const fullLink = await fireSaver.upload(imageUrl, `public/images/${id}`);
     const shortLinkData = fullLink ? await fireSaver.createShortLink(fullLink) : null;
     images[id] = Object.assign({
       url,
@@ -102,13 +104,15 @@ export default class Screenshoter {
       type,
       created: Date.now(),
     }, shortLinkData);
-    setStorageData({ images });
+    return setStorageData({ images });
   }
 
   async deleteImage(id) {
     const { images } = await getStorageData('images');
     delete images[id];
     await setStorageData({ images });
+    const fileRef = fireSaver.getFileRef(`public/images/${id}`);
+    fileRef.delete();
   }
 
   generateUniqueId(ids) {
@@ -121,7 +125,6 @@ export default class Screenshoter {
 
   setEvents() {
     chrome.browserAction.onClicked.addListener(async (tab) => {
-      console.log(tab);
       const imageUrl = await this.makeVisibleTabScreenshot(tab);
       await this.saveImage(tab, imageUrl, 'visibleTab');
       // chrome.downloads.download({ url });
@@ -134,35 +137,4 @@ export default class Screenshoter {
       return true;
     }); */
   }
-
-  /* makeTabScreen({ windowId }) {
-    return new Promise((resolve) => {
-      chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
-        resolve(dataUrl);
-      });
-    });
-  }
-
-  shot({ data, sendResponse }) {
-    const { state } = data;
-    if (state === 'start') {
-      this.frames = [];
-    }
-    this.makeTabScreen().then((dataUrl) => {
-      this.frames.push(dataUrl);
-      sendResponse(true);
-    });
-  }
-
-  init() {
-    firebase.initializeApp({
-      apiKey: 'AIzaSyCXOnKAh8JJHsWUkAiM63tFXpe0fSOZPfg',
-      authDomain: 'screenshooter-58c94.firebaseapp.com',
-      databaseURL: 'https://screenshooter-58c94.firebaseio.com',
-      projectId: 'screenshooter-58c94',
-      storageBucket: 'screenshooter-58c94.appspot.com',
-      messagingSenderId: '271946534911',
-      appId: '1:271946534911:web:abdccfda9f1934b36ea1ca',
-    });
-  } */
 }
