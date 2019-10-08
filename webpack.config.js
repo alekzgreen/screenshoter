@@ -66,6 +66,7 @@ module.exports = (env) => {
     entry: {
       bg: PATHS.source + '/bg/app.js',
       settings: PATHS.source + '/settings/app.js',
+      popup: PATHS.source + '/popup/app.js',
       content: PATHS.source + '/content/app.js',
     },
     output: {
