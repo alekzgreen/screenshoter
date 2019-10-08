@@ -28,7 +28,8 @@
 	},
 	"browser_action": {
 		"default_icon": "icon-disabled-32.png",
-		"default_title": "Frame - Chrome Screenshots"
+		"default_title": "Frame - Chrome Screenshots",
+		"default_popup": "popup.html"
 	},
 	"icons": {
 		"32": "icon-32.png",
