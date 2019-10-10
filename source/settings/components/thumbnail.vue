@@ -1,7 +1,7 @@
 <template>
   <div
     :class="['thumbnail', removing && 'thumbnail_deleted']">
-    <div class="thumbnail__image" :style="{backgroundImage: `url(${image.imageUrl})`}"></div>
+    <div class="thumbnail__image" ></div>
     <div
       class="thumbnail__icon thumbnail__icon_delete"
       v-html="require('!!svg-inline-loader!../../assets/close.svg')"

@@ -19,8 +19,12 @@ const attachDebugger = promiseWrapper(chrome.debugger, 'attach');
 const detachDebugger = promiseWrapper(chrome.debugger, 'detach');
 const sendCommand = promiseWrapper(chrome.debugger, 'sendCommand');
 const createTab = promiseWrapper(chrome.tabs, 'create');
+const getTab = promiseWrapper(chrome.tabs, 'query');
 const captureVisibleTab = promiseWrapper(chrome.tabs, 'captureVisibleTab');
+const getCurrentTab = promiseWrapper(chrome.tabs, 'getCurrent');
 const downloadFile = promiseWrapper(chrome.downloads, 'download');
+const createContextMenu = promiseWrapper(chrome.contextMenus, 'create');
+const removeAllContextMenus = promiseWrapper(chrome.contextMenus, 'removeAll');
 const asyncTimeout = async t => new Promise(r => setTimeout(() => r(true), t));
 
 const createVideoUrl = (chunks, type) => {
@@ -148,4 +152,8 @@ export {
   asyncTimeout,
   downloadFile,
   captureVisibleTab,
+  createContextMenu,
+  getCurrentTab,
+  getTab,
+  removeAllContextMenus,
 };

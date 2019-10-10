@@ -8,9 +8,14 @@ import {
   detachDebugger,
   setStorageData,
   getStorageData,
+  downloadFile,
   captureVisibleTab,
   sendBackgroundMessage,
+  removeAllContextMenus,
+  createContextMenu,
+  getTab,
 } from '../utils';
+import { disabledUrls } from '../constants';
 import FireSaver from './fireSaver';
 
 /* eslint class-methods-use-this: ["error", {
@@ -22,7 +27,11 @@ import FireSaver from './fireSaver';
     "makeVisibleTabScreenshot",
     "printToPDF",
     "saveImage",
-    "deleteImage"
+    "deleteImage",
+    "createContextMenu",
+    "isDisabledUrl",
+    "saveChunks",
+    "loadImages"
   ]
 }] */
 
@@ -39,6 +48,7 @@ const fireSaver = new FireSaver({
 export default class Screenshoter {
   constructor() {
     this.saving = false;
+    this.chunks = [];
     this.setEvents();
   }
 
@@ -48,6 +58,38 @@ export default class Screenshoter {
     } catch (e) {
       await executeScripts(tabId, ['vendors/bundle.js', 'content/bundle.js']);
     }
+  }
+
+  async saveChunk({ sender, sendResponse }) {
+    const imageUrl = await this.makeVisibleTabScreenshot(sender.tab);
+    this.chunks.push(imageUrl);
+    sendResponse(true);
+  }
+
+  async saveChunks() {
+    const canvas = document.createElement('canvas');
+    document.body.append(canvas);
+    const ctx = canvas.getContext('2d');
+    const images = await this.loadImages(this.chunks);
+    canvas.width = images[1].width;
+    canvas.height = images[1].height * images.length;
+    images.reverse();
+    images.forEach((image, index) => ctx.drawImage(image, 0, index * image.height));
+    const dataUrl = canvas.toDataURL();
+    this.chunks = [];
+    // console.log(dataUrl);
+    downloadFile({ url: dataUrl });
+  }
+
+  async loadImages(dataUrls) {
+    return Promise.all(dataUrls.map((dataUrl) => {
+      const promise = new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.src = dataUrl;
+      });
+      return promise;
+    }));
   }
 
   async makeFullSizeScreenshot({ id: tabId, width: tabWidth }) {
@@ -123,18 +165,56 @@ export default class Screenshoter {
     return id;
   }
 
-  setEvents() {
-    chrome.browserAction.onClicked.addListener(async (tab) => {
-      const imageUrl = await this.makeVisibleTabScreenshot(tab);
-      await this.saveImage(tab, imageUrl, 'visibleTab');
-      // chrome.downloads.download({ url });
+  async createContextMenu(onlyVisible) {
+    await removeAllContextMenus();
+    await createContextMenu({
+      id: 'mainContext',
+      title: 'Hello',
     });
-    /* chrome.runtime.onMessage.addListener(({ action, module, data }, sender, sendResponse) => {
+    await createContextMenu({
+      id: 'makeVisibleTabScreenshotMenu',
+      parentId: 'mainContext',
+      title: 'Capture visible zone',
+      onclick: async (info, tab) => {
+        const imageUrl = await this.makeVisibleTabScreenshot(tab);
+        await this.saveImage(tab, imageUrl, 'visibleTab');
+      },
+    });
+    if (!onlyVisible) {
+      await createContextMenu({
+        id: 'makeFullSizeScreenshotMenu',
+        parentId: 'mainContext',
+        title: 'Make whole page screenshot',
+        onclick: async (info, tab) => {
+          const imageUrl = await this.makeFullSizeScreenshot(tab);
+          await this.saveImage(tab, imageUrl, 'fullSize');
+        },
+      });
+    }
+  }
+
+  isDisabledUrl(url) {
+    return disabledUrls.find(disabledUrl => url.includes(disabledUrl));
+  }
+
+  setEvents() {
+    chrome.browserAction.onClicked.addListener(() => chrome.runtime.openOptionsPage());
+    chrome.tabs.onUpdated.addListener(async (tabId, { status }) => {
+      if (status === 'complete') {
+        const [{ url }] = await getTab({ active: true });
+        this.createContextMenu(this.isDisabledUrl(url));
+      }
+    });
+    chrome.tabs.onActivated.addListener(async () => {
+      const [{ url }] = await getTab({ active: true });
+      this.createContextMenu(this.isDisabledUrl(url));
+    });
+    chrome.runtime.onMessage.addListener(({ action, module, data }, sender, sendResponse) => {
       if (module !== 'screenshoter' || typeof this[action] !== 'function') {
         return false;
       }
       this[action]({ data, sender, sendResponse });
       return true;
-    }); */
+    });
   }
 }
