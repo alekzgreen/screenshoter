@@ -36,7 +36,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  background-color: #343434;
+  background-color: #4c4c4c;
   margin: 0;
   flex-direction: column;
 }

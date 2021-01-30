@@ -13,6 +13,7 @@ import {
   sendBackgroundMessage,
   removeAllContextMenus,
   createContextMenu,
+  makeThumbnail,
   getTab,
 } from '../utils';
 import { disabledUrls } from '../constants';
@@ -138,10 +139,12 @@ export default class Screenshoter {
     const id = this.generateUniqueId(Object.keys(images));
     const fullLink = await fireSaver.upload(imageUrl, `public/images/${id}`);
     const shortLinkData = fullLink ? await fireSaver.createShortLink(fullLink) : null;
+    const thumbnail = await makeThumbnail(imageUrl, 0.5);
     images[id] = Object.assign({
       url,
       title,
       imageUrl,
+      thumbnail,
       fullLink,
       type,
       created: Date.now(),

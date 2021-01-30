@@ -1,38 +1,40 @@
 <template>
   <div
     :class="['thumbnail', removing && 'thumbnail_deleted']">
-    <div class="thumbnail__image" ></div>
+    <div class="thumbnail__image" :style="{ backgroundImage: `url(${image.thumbnail})` }"></div>
     <div
       class="thumbnail__icon thumbnail__icon_delete"
       v-html="require('!!svg-inline-loader!../../assets/close.svg')"
       @click.stop="remove"
     ></div>
     <div class="thumbnail__info">
-      <div class="thumbnail__ctas">
-          <div
-          class="thumbnail__icon"
-          v-html="require('!!svg-inline-loader!../../assets/download.svg')"
-          :style="{ marginRight: '10px' }"
-          @click="download"
-        ></div>
-        <div class="thumbnail__delimeter"></div>
-        <div
-          class="thumbnail__icon"
-          v-html="require('!!svg-inline-loader!../../assets/link.svg')"
-          :style="{ marginLeft: '10px' }"
-          @click="copyLink"
-        ></div>
+      <div>
+        <div class="thumbnail__title">{{ image.title }}</div>
+        <div class="thumbnail__date">{{ image.created | date }}</div>
       </div>
-      <div class="thumbnail__title">{{ image.title }}</div>
-      <div class="thumbnail__date">{{ image.created | date }}</div>
+      <div class="thumbnail__ctas">
+        <CTA
+          title="Download image"
+          :style="{ marginRight: '10px' }"
+          @click.native="download"
+          v-html="require('!!svg-inline-loader!../../assets/download.svg')" />
+        <CTA
+          title="Copy shortlink"
+          @click.native="copyLink"
+          v-html="require('!!svg-inline-loader!../../assets/link.svg')" />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { copyToClipboard, downloadFile, asyncTimeout } from '../../utils';
+import CTA from './cta.vue';
 
 export default {
+  components: {
+    CTA,
+  },
   props: ['id', 'image'],
   data() {
     return {
@@ -79,26 +81,22 @@ export default {
 <style lang="less">
 .thumbnail {
   display: flex;
-  width: 160px;
-  height: 160px;
+  width: 290px;
+  height: 220px;
   justify-self: center;
   align-self: center;
   box-sizing: border-box;
-  box-shadow: 0 0px 30px 0 #121212;
-  border-radius: 3px;
+  border-radius: 8px;
   flex-shrink: 0;
-  cursor: pointer;
   position: relative;
   color: #fff;
   overflow: hidden;
   align-items: center;
   justify-content: center;
-  transition: all 0.5s;
+  transition: all 0.3s;
 
   &_deleted {
     filter: blur(5px);
-    width: 0;
-    height: 0;
   }
 
   &:hover {
@@ -120,30 +118,30 @@ export default {
   &__info {
     display: flex;
     width: 100%;
-    height: 100%;
-    background-color: #37373780;
+    height: 60px;
+    background-color: #0f0a0a80;
     position: absolute;
     flex-shrink: 0;
-    top: 0;
+    bottom: 0;
     opacity: 0;
-    flex-direction: column;
-    padding: 5px;
+    padding: 0 15px;
     box-sizing: border-box;
     transition: bottom 0.3s;
     line-height: 1.7;
     align-items: center;
-    justify-content: center;
-    transition: opacity .5s;
+    justify-content: space-between;
+    transition: opacity .3s;
+    cursor: default;
   }
 
   &__title {
     font-size: 12px;
     font-weight: 600;
-    width: 100%;
+    width: 150px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    text-align: center;
+    text-align: left;
   }
 
   &__delimeter {
@@ -159,7 +157,6 @@ export default {
 
   &__ctas {
     display: flex;
-    margin-bottom: 10px;
   }
 
   &__icon {
@@ -172,31 +169,20 @@ export default {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-
-    &:hover {
-      svg {
-        opacity: 1;
-      }
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-      opacity: 0.7;
-      transition: opacity .3s;
-      g {
-        fill: #c1494f;
-      }
-    }
+    cursor: pointer;
 
     &_delete {
-      width: 12px;
-      height: 12px;
+      width: 15px;
+      height: 15px;
       position: absolute;
-      top: 6px;
-      right: 6px;
+      top: 10px;
+      right: 15px;
       background-color: transparent;
       z-index: 1;
+
+      svg {
+        fill: #c1494f;
+      }
     }
   }
 }

@@ -93,6 +93,23 @@ const makeSnapshot = ({ video, type, scale = 1 }) => {
   }).catch(() => null);
 };
 
+const makeThumbnail = async (dataUrl, scale = 1) => {
+  let canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const image = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = dataUrl;
+  });
+  canvas.width = 250;
+  canvas.height = 250;
+  ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
+  const canvasData = canvas.toDataURL();
+  canvas.remove();
+  canvas = null;
+  return canvasData;
+};
+
 const executeScripts = (tabId, scripts) => {
   const promises = scripts.map((file) => {
     const promise = new Promise((resolve) => {
@@ -156,4 +173,5 @@ export {
   getCurrentTab,
   getTab,
   removeAllContextMenus,
+  makeThumbnail,
 };

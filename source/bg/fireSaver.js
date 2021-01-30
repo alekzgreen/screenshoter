@@ -24,7 +24,7 @@ export default class FireSaver {
       const response = await fetch(`${url}${apiKey}`, {
         method: 'POST',
         body: JSON.stringify({
-          longDynamicLink: `https://t1nylink.page.link/?link=${fullUrl}`,
+          longDynamicLink: `https://t1nylink.page.link/?link=${encodeURIComponent(fullUrl)}`,
         }),
       });
       return response.json();

@@ -41,8 +41,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "firebase": "^5.8.5",
-    "lodash": "^4.17.15",
+    "firebase": "^8.2.5",
+    "lodash": "^4.17.20",
     "vue": "^2.5.17",
     "vuex": "^3.0.1"
   }
