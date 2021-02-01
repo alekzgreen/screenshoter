@@ -21,6 +21,28 @@ export default {
     images() {
       return this.$store.state.images;
     },
+    sorted() {
+      const results = {};
+      const array = Object.entries(this.images);
+      array
+        .sort(([, aImage], [, bImage]) => bImage.created - aImage.created)
+        .forEach(([id, image], index) => {
+
+        });
+
+        .sort((a, b) => b.timeCreated - a.timeCreated)
+        .forEach((item, index) => {
+          const previousMs = array[index - 1] ? array[index - 1].timeCreated : now;
+          const sortName = `get${this.sortName}`;
+          const previousDate = new Date(previousMs)[sortName]();
+          const itemDate = new Date(item.timeCreated)[sortName]();
+          if (!results.length || itemDate !== previousDate) {
+            results.push({ items: [], title: this.getDate(item.timeCreated) });
+          }
+          results[results.length - 1].items.push(item);
+        });
+      return result;
+    }
   },
   filters: {
     date(value) {

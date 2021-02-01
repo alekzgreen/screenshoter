@@ -172,7 +172,7 @@ export default class Screenshoter {
     await removeAllContextMenus();
     await createContextMenu({
       id: 'mainContext',
-      title: 'Hello',
+      title: 'Frame',
     });
     await createContextMenu({
       id: 'makeVisibleTabScreenshotMenu',
