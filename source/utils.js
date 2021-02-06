@@ -150,6 +150,12 @@ const sendBackgroundMessage = (tabId, params) => {
   return promise;
 };
 
+const getMonthYear = (ms) => {
+  const date = new Date(ms);
+  const options = { year: 'numeric', month: 'long' };
+  return `${date.toLocaleDateString('en-US', options)}`;
+};
+
 export {
   createVideoUrl,
   getStorageData,
@@ -174,4 +180,5 @@ export {
   getTab,
   removeAllContextMenus,
   makeThumbnail,
+  getMonthYear,
 };

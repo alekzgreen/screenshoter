@@ -24,6 +24,8 @@ export default {
   methods: {
     toggleItem(index) {
       this.currentIndex = index;
+      const sectionEl = document.querySelector(`[section-id="${this.items[index].id}"]`);
+      return sectionEl?.scrollIntoView({ behavior: 'smooth' });
     },
   },
 };
@@ -36,20 +38,27 @@ export default {
   flex-direction: column;
   top: 100px;
   left: 20px;
+  width: 130px;
   z-index: 1;
-  justify-content: flex-end;
   box-sizing: border-box;
+  height: calc(~'100% - 200px');
+  justify-content: flex-start;
+  overflow: hidden;
 
   &__items {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    width: calc(~'100% + 50px');
+    overflow: hidden;
+    overflow-y: auto;
   }
 
   &__item {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    padding-left: 25px;
+    padding-left: 28px;
     cursor: pointer;
 
     &:hover .slider__dot {
@@ -74,7 +83,7 @@ export default {
     display: flex;
     position: absolute;
     width: 8px;
-    left: 0;
+    left: 3px;
     height: 8px;
     border-radius: 8px;
     background-color: #2f2f2f;

@@ -45,7 +45,7 @@ export default {
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  width: 100%;
+  width: calc(~'100% + 20px');
   height: 100%;
   align-items: center;
 }

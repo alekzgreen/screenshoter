@@ -1,7 +1,9 @@
 <template>
   <div
     :class="['thumbnail', removing && 'thumbnail_deleted']">
-    <div class="thumbnail__image" :style="{ backgroundImage: `url(${image.thumbnail})` }"></div>
+    <div
+      :class="['thumbnail__image', !image.thumbnail && 'thumbnail__image_empty']"
+      :style="{ backgroundImage: `url(${image.thumbnail})` }"></div>
     <div
       class="thumbnail__icon thumbnail__icon_delete"
       v-html="require('!!svg-inline-loader!../../assets/close.svg')"
@@ -35,7 +37,7 @@ export default {
   components: {
     CTA,
   },
-  props: ['id', 'image'],
+  props: ['image'],
   data() {
     return {
       saving: false,
@@ -68,7 +70,7 @@ export default {
       if (!this.removing) {
         this.removing = true;
         const { screenshoter } = chrome.extension.getBackgroundPage();
-        await screenshoter.deleteImage(this.id);
+        await screenshoter.deleteImage(this.image.id);
         await asyncTimeout(50);
         await this.$store.dispatch('init');
       }
@@ -113,6 +115,11 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    &_empty {
+      background-size: 30%;
+      background-color: #333;
+      background-image: url('../../assets/picture.svg') !important;
+    }
   }
 
   &__info {
