@@ -1,14 +1,8 @@
-import { getStorageData } from '../utils';
+import browser from 'webextension-polyfill';
 
 export default {
   state: {
-    currentSection: 'content',
-    sections: {
-      content: {
-        title: 'Saved Images',
-      },
-    },
-    images: null,
+    image: null,
   },
   mutations: {
     set(state, data) {
@@ -17,8 +11,9 @@ export default {
   },
   actions: {
     async init({ commit }) {
-      const { images } = await getStorageData('images');
-      commit('set', { images });
+      const { cachedImage: image } = await browser.storage.local.get('cachedImage');
+      window.CACHED_IMAGE = image;
+      commit('set', { image });
     },
   },
 };

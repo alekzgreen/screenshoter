@@ -1,123 +1,128 @@
 const path = require('path');
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
+const StringReplacePlugin = require('string-replace-webpack-plugin'); 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const EventHooksPlugin = require('event-hooks-webpack-plugin');
+const { PromiseTask } = require('event-hooks-webpack-plugin/lib/tasks');
+const fs = require('fs-extra');
 
 const PATHS = {
   source: path.join(__dirname, 'source'),
-  build: path.join(__dirname, 'app'),
+  static: path.join(__dirname, 'static'),
+  build: path.join(__dirname, 'build'),
 };
 
-module.exports = (env) => {
-  const mode = env.production ? 'production' : 'development';
-  console.log(mode);
-  return {
-    mode,
-    devtool: 'cheap-source-map',
-    watch: true,
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new UglifyJsPlugin({
-          uglifyOptions:
-            mode === 'development'
-              ? {
-                  compress: true,
-                  mangle: false,
-                  output: {
-                    comments: false,
-                    beautify: true,
-                  },
-                }
-              : {
-                  compress: {
-                    drop_console: true,
-                  },
-                },
-        }),
-        new OptimizeCSSAssetsPlugin({}),
-      ],
-      splitChunks: {
-        cacheGroups: {
-          commons: {
-            test(mod) {
-             // Only node_modules are needed
-             if (!mod.context.includes('node_modules')) {
-               return false;
-             }
-             // But not node modules that contain these key words in the path
-             if ([ 'firebase' ].some(str => mod.context.includes(str))) {
-               return false;
-             }
-              return true;
-            },
-            name: 'vendors',
-            chunks: 'all'
-          },
-        },
-        name: false,
+const getReplacements = (names = ['assets']) => {
+  return names.map((name) => ({
+    pattern: new RegExp(`@${name}`, 'gi'),
+    replacement: () => path.join(__dirname, 'source', `${name}`)
+  }));
+};
+
+const plugins = [
+  new VueLoaderPlugin(),
+  new MiniCssExtractPlugin({ filename: '[name]/styles.css' }),
+  new ESLintPlugin({
+    extensions: ['js', 'vue'],
+    files: 'source',
+  }),
+  new EventHooksPlugin({
+    beforeRun: new PromiseTask(async () => {
+      await fs.remove(PATHS.build);
+      await fs.copy(PATHS.static, PATHS.build);
+    }),
+  }),
+];
+
+const rules = [
+  {
+    enforce: 'pre',
+    test: /\.(vue|html)$/,
+    use: [{ loader: StringReplacePlugin.replace({ replacements: getReplacements() }) }],
+  },
+  {
+    test: /\.vue$/,
+    use: 'vue-loader',
+  },
+  {
+    test: /\.js$/,
+    exclude: /node_modules/,
+    use: [{
+      loader: 'babel-loader',
+      options: {
+        presets: ['@babel/preset-env'],
+        plugins: [
+          '@babel/plugin-transform-runtime',
+          '@babel/plugin-proposal-class-properties',
+        ],
+      },
+    }],
+  },
+  {
+    test: /\.less$/,
+    exclude: /(font)\.less$/,
+    use: [
+      MiniCssExtractPlugin.loader,
+      'css-loader',
+      'less-loader',
+    ],
+  },
+  {
+    test: /(font)\.less$/,
+    use: [
+      { loader: 'style-loader', options: { injectType: 'lazyStyleTag', insert: 'html' } },
+      'css-loader',
+      'less-loader',
+    ],
+  },
+  {
+    test: /\.(png|jpg|gif|eot|svg|otf|ttf|woff|woff2)$/,
+    use: {
+      loader: 'url-loader',
+      options: {
+        esModule: false,
       },
     },
-    entry: {
-      bg: PATHS.source + '/bg/app.js',
-      settings: PATHS.source + '/settings/app.js',
-      popup: PATHS.source + '/popup/app.js',
-      content: PATHS.source + '/content/app.js',
+  },
+];
+
+module.exports = (env, argv) => ({
+  mode: argv.mode,
+  devtool: argv.mode === 'production' ? false : 'inline-source-map',
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: 'vendors',
+          chunks: 'initial',
+          minChunks: 2,
+        },
+      },
+      name: false,
     },
-    output: {
-      path: PATHS.build,
-      filename: '[name]/bundle.js',
+  },
+  entry: {
+    bg: path.resolve(__dirname, PATHS.source, 'bg', 'app.js'),
+    content: path.resolve(__dirname, PATHS.source, 'content', 'app.js'),
+    settings: path.resolve(__dirname, PATHS.source, 'settings', 'app.js'),
+  },
+  output: {
+    path: PATHS.build,
+    filename: '[name]/bundle.js',
+  },
+  resolve: {
+    alias: {
+      '@constants': path.resolve(__dirname, PATHS.source, 'constants.js'),
+      '@utils': path.resolve(__dirname, PATHS.source, 'utils.js'),
+      '@assets': path.resolve(__dirname, PATHS.source, 'assets'),
+      vue$: path.resolve(__dirname, 'node_modules/vue/dist/vue.common.js'),
+      vuex$: path.resolve(__dirname, 'node_modules/vuex/dist/vuex.js'),
     },
-    module: {
-      rules: [
-        {
-          test: /\.vue$/,
-          use: 'vue-loader',
-        },
-        {
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          exclude: /node_modules/,
-          loader: 'eslint-loader',
-        },
-        {
-          test: /\.js$/,
-          exclude: /(node_modules)/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
-              plugins: ['lodash', '@babel/plugin-transform-runtime', '@babel/plugin-proposal-optional-chaining'],
-            },
-          },
-        },
-        {
-          test: /\.less$/,
-          use: ['vue-style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
-        },
-        {
-          test: /\.(png|jpg|gif|eot|svg|otf|ttf|woff|woff2)$/,
-          loader: 'url-loader',
-          options: {
-            limit: 500000,
-          },
-        },
-      ],
-    },
-    plugins: [
-      new VueLoaderPlugin(),
-      new CleanWebpackPlugin(['app']),
-      new CopyWebpackPlugin([{ from: 'static' }]),
-      new MiniCssExtractPlugin({ filename: '[name]/styles.css' }),
-      new LodashModuleReplacementPlugin({
-        collections: true,
-        paths: true,
-      }),
-    ],
-  };
-};
+  },
+  module: {
+    rules,
+  },
+  plugins,
+});

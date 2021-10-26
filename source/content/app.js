@@ -1,13 +1,11 @@
-import { asyncTimeout, sendContentMessage } from '../utils';
+import browser from 'webextension-polyfill';
+import { asyncTimeout } from '../utils';
 
 /* eslint class-methods-use-this: ["error", {
   "exceptMethods": [
     "ping",
     "getPageSizes",
-    "scrollStart",
-    "scrollEnd",
-    "makeChunk",
-    "saveChunks"
+    "scrollToStart",
   ]
 }] */
 
@@ -17,51 +15,24 @@ class Content {
   }
 
   setEvents() {
-    chrome.runtime.onMessage.addListener(({ action, module, data }, sender, sendResponse) => {
-      if (module !== 'content' || typeof this[action] !== 'function') {
-        return false;
-      }
-      this[action]({ data, sender, sendResponse });
-      return true;
-    });
+    browser.runtime.onMessage.addListener(async ({ action, data }) => this[action]?.(data));
   }
 
-  getPageSizes({ sendResponse }) {
-    const { scrollHeight, clientHeight } = document.documentElement;
-    sendResponse({ scrollHeight, clientHeight, ratio: window.devicePixelRatio });
-  }
-
-  async scrollStart({ sendResponse }) {
-    window.scrollTo(0, 0);
-    await asyncTimeout(500);
-    sendResponse(true);
-  }
-
-  async scrollEnd() {
+  getPageSizes() {
     const { scrollHeight } = document.documentElement;
-    document.documentElement.scroll(0, scrollHeight);
+    const data = {
+      width: window.screen.width, height: scrollHeight, ratio: window.devicePixelRatio,
+    };
+    return data;
   }
 
-  async makeChunk() {
-    const { clientHeight, scrollHeight } = document.documentElement;
-    await sendContentMessage({ action: 'saveChunk', module: 'screenshoter' });
-    document.documentElement.scroll(0, window.scrollY - clientHeight);
-    await asyncTimeout(500);
-    console.log(1111, window.scrollY);
-    if (window.scrollY) {
-      console.log('!!!!!!!');
-      return this.makeChunk();
-    }
-    await sendContentMessage({
-      action: 'saveChunks',
-      module: 'screenshoter',
-      data: { scrollHeight, clientHeight },
-    });
+  async scrollToStart() {
+    window.scrollTo(0, 0);
+    return asyncTimeout(500);
+  }
+
+  ping() {
     return true;
-  }
-
-  ping({ sendResponse }) {
-    sendResponse(true);
   }
 }
 

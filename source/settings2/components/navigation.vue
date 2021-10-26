@@ -6,10 +6,12 @@
         v-for="(section, name, index) in sections"
         :key="index"
         @click="toggleSection(name)"
+        :class="[
+          `navigation__item_${name}`,
+          currentSection === name && 'navigation__item_active']"
       >
         {{ section.title }}
       </div>
-      <div class="navigation__item">Gallery</div>
     </div>
   </div>
 </template>
@@ -17,6 +19,9 @@
 <script>
 export default {
   computed: {
+    currentSection() {
+      return this.$store.state.currentSection;
+    },
     sections() {
       return this.$store.state.sections;
     },
@@ -35,20 +40,20 @@ export default {
 <style lang="less">
 .navigation {
   display: flex;
-  width: 240px;
-  height: 100%;
-  flex-direction: column;
+  width: 100%;
+  height: 60px;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 1;
   background-color: #121212;
+  padding: 0 30px;
+  justify-content: flex-end;
   box-sizing: border-box;
-  box-shadow: 0 0px 15px 0 #121212;
+  min-width: 800px;
 
   &__items {
     display: flex;
-    width: 100%;
-    justify-content: space-evenly;
-    height: 150px;
-    flex-direction: column;
   }
 
   &__item {
@@ -61,7 +66,7 @@ export default {
     text-transform: uppercase;
     font-weight: 600;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     letter-spacing: 0.3px;
     padding: 0 20px;
     cursor: pointer;

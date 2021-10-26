@@ -1,35 +1,55 @@
 <template>
-  <div class="wrapper">
-    <Navigation />
-    <keep-alive>
-      <component :is="currentSection"></component>
-    </keep-alive>
+  <div class="app">
+    <tui-image-editor ref="tuiImageEditor" :include-ui="useDefaultUI" :options="options" />
   </div>
 </template>
+
 <script>
-import Navigation from './components/navigation.vue';
-import Content from './components/content.vue';
+/* eslint-disable import/no-extraneous-dependencies */
+import { ImageEditor } from '@toast-ui/vue-image-editor';
 
 export default {
   components: {
-    Navigation,
-    Content,
+    'tui-image-editor': ImageEditor,
+  },
+  data() {
+    return {
+      useDefaultUI: true,
+    };
   },
   computed: {
-    currentSection() {
-      const section = this.$store.state.currentSection;
-      return section.charAt(0).toUpperCase() + section.slice(1);
+    image() {
+      return this.$store.state.image;
+    },
+    options() {
+      return {
+        includeUI: {
+          loadImage: {
+            path: this.image,
+            name: 'SampleImage',
+          },
+        },
+        // for tui-image-editor component's "options" prop
+        cssMaxWidth: 700,
+        cssMaxHeight: 500,
+      };
     },
   },
-  created() {
-    this.$store.dispatch('init');
+  mounted() {
+    console.log(this);
+    // eslint-disable-next-line no-unused-vars
+    /* this.$refs.tuiImageEditor.invoke('addImageObject', '../icon-32.png').then((objectProps) => {
+      console.log(objectProps);
+    }); */
   },
 };
 </script>
 <style lang="less">
 @import '../styles.less';
+@import 'tui-color-picker/dist/tui-color-picker.css';
+@import 'tui-image-editor/dist/tui-image-editor.css';
 
-.wrapper {
+.app {
   display: flex;
   width: 100%;
   height: 100%;
@@ -39,14 +59,5 @@ export default {
   background-color: #4c4c4c;
   margin: 0;
   flex-direction: column;
-}
-
-.section {
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  width: calc(~'100% + 20px');
-  height: 100%;
-  align-items: center;
 }
 </style>

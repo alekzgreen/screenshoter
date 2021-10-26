@@ -23,7 +23,7 @@
 		"downloads"
 	],
 	"background": {
-		"scripts": ["vendors/bundle.js", "bg/bundle.js"],
+		"scripts": [ "vendors/bundle.js", "bg/bundle.js"],
 		"persistent": true
 	},
 	"browser_action": {
@@ -36,5 +36,5 @@
 		"128": "icon-128.png"
 	},
 	"content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
-	"web_accessible_resources": ["content/*.svg"]
+	"web_accessible_resources": ["content/*.svg", "*.png"]
 }

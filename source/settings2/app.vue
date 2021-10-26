@@ -1,14 +1,19 @@
 <template>
   <div class="wrapper">
     <Navigation />
+    <keep-alive>
+      <component :is="currentSection"></component>
+    </keep-alive>
   </div>
 </template>
 <script>
 import Navigation from './components/navigation.vue';
+import Content from './components/content.vue';
 
 export default {
   components: {
     Navigation,
+    Content,
   },
   computed: {
     currentSection() {
@@ -22,24 +27,26 @@ export default {
 };
 </script>
 <style lang="less">
-html,
-body {
-  width: 300px;
-  height: 300px;
-  padding: 0;
-  margin: 0;
-  background-color: #373737;
-  font-family: Helvetica, Arial, sans-serif;
-}
-
-body {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0;
-  margin: 0;
-}
+@import '../styles.less';
 
 .wrapper {
   display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  background-color: #4c4c4c;
+  margin: 0;
+  flex-direction: column;
+}
+
+.section {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  width: calc(~'100% + 20px');
+  height: 100%;
+  align-items: center;
 }
 </style>
