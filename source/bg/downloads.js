@@ -10,15 +10,19 @@ export default class Downloads {
     this.name = name;
   }
 
-  async download({ url, name, meta }) {
+  async download({ url, name, meta }, save = false) {
     const filename = `${name ?? Date.now()}`;
     const downloadId = await browser.downloads.download({ url, filename });
-    if (downloadId) {
-      const storageName = `downloads.${name}`;
-      const { [storageName]: downloads = {} } = await browser.storage.local.get(storageName);
-      downloads[downloadId] = meta;
-      await browser.storage.local.set({ [storageName]: downloads });
+    if (downloadId && save) {
+      await this.save({ downloadId, meta });
     }
     return downloadId;
+  }
+
+  async save({ downloadId, meta }) {
+    const storageName = `downloads.${this.name}`;
+    const { [storageName]: downloads = {} } = await browser.storage.local.get(storageName);
+    downloads[downloadId] = meta;
+    await browser.storage.local.set({ [storageName]: downloads });
   }
 }

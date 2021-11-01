@@ -44,19 +44,33 @@ class App {
 
   async makeTabScreenshot(tab) {
     const url = await this.capturer.makeVisibleTabScreenshot(tab);
-    await this.downloads.download({ url, name: `frame-tab-screenshot-${Date.now()}.jpeg` });
     await browser.storage.local.set({ cachedImage: url });
+    await browser.tabs.create({ url: browser.extension.getURL('settings.html') });
   }
 
   async makeFullPageScreenshot(tab) {
+    console.time('makescreen');
+    const { host } = new URL(tab.url);
+    const now = Date.now();
     await this.executeScripts(tab.id);
     const [pageSizes] = await Promise.all([
       browser.tabs.sendMessage(tab.id, { action: 'getPageSizes' }),
       browser.tabs.sendMessage(tab.id, { action: 'scrollToStart' }),
     ]);
-    const url = await this.capturer.makeFullSizeScreenshot({ tabId: tab.id, pageSizes });
-    await this.downloads.download({ url, name: `frame-fullpage-screenshot-${Date.now()}.png` });
-    await browser.storage.local.set({ cachedImage: url });
+    const results = await this.capturer.makeFullSizeScreenshot({ tabId: tab.id, pageSizes });
+    console.timeEnd('makescreen');
+    if (results.length > 1) {
+      await Promise.all(
+        results.map(async (url, index) => {
+          const name = `${host}-${now}-fullpage-screenshot-${index}.png`;
+          await this.downloads.download({ url, name });
+        }),
+      );
+    }
+    if (pageSizes.height < 7500) {
+      await browser.storage.local.set({ cachedImage: results[0] });
+      await browser.tabs.create({ url: browser.extension.getURL('settings.html') });
+    }
   }
 
   async executeScripts(tabId) {

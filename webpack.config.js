@@ -70,6 +70,10 @@ const rules = [
     ],
   },
   {
+    test: /\.css$/i,
+    use: ['style-loader', 'css-loader'],
+  },
+  {
     test: /(font)\.less$/,
     use: [
       { loader: 'style-loader', options: { injectType: 'lazyStyleTag', insert: 'html' } },

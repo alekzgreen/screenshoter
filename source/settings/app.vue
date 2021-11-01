@@ -1,10 +1,12 @@
 <template>
   <div class="app">
     <tui-image-editor ref="tuiImageEditor" :include-ui="useDefaultUI" :options="options" />
+    <div class="cta cta_download" @click="download">Download</div>
   </div>
 </template>
 
 <script>
+import browser from 'webextension-polyfill';
 /* eslint-disable import/no-extraneous-dependencies */
 import { ImageEditor } from '@toast-ui/vue-image-editor';
 
@@ -30,17 +32,17 @@ export default {
           },
         },
         // for tui-image-editor component's "options" prop
-        cssMaxWidth: 700,
-        cssMaxHeight: 500,
+        cssMaxWidth: 1440,
+        cssMaxHeight: 900,
       };
     },
   },
-  mounted() {
-    console.log(this);
-    // eslint-disable-next-line no-unused-vars
-    /* this.$refs.tuiImageEditor.invoke('addImageObject', '../icon-32.png').then((objectProps) => {
-      console.log(objectProps);
-    }); */
+  methods: {
+    download() {
+      const { APP } = browser.extension.getBackgroundPage();
+      const url = this.$refs.tuiImageEditor.invoke('toDataURL');
+      APP.downloads.download({ url, name: `frame-${Date.now()}-screenshot.png` }, true);
+    },
   },
 };
 </script>
@@ -59,5 +61,31 @@ export default {
   background-color: #4c4c4c;
   margin: 0;
   flex-direction: column;
+}
+
+.tui-image-editor-header-logo, .tui-image-editor-header-buttons {
+  display: none;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  color: #fff;
+  background-color: #c1494f;
+  border-radius: 20px;
+  padding: 0 20px;
+  height: 40px;
+  cursor: pointer;
+
+  &_download {
+    position: absolute;
+    top: 8px;
+    right: 20px
+  }
 }
 </style>
